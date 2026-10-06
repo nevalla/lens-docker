@@ -1,6 +1,6 @@
 {
   "name": "lens-docker",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Docker on your machine, inside Lens: an overview, Compose apps, containers, images and volumes, with logs, shells, database consoles and live CPU and memory.",
   "license": "MIT",
   "author": "Lauri Nevala <lauri.nevala@gmail.com>",
@@ -48,6 +48,8 @@
     "@k8slens/navigator-components": "^1.0.3",
     "@k8slens/navigator-contracts": "^2.2.0",
     "@k8slens/notifications-contracts": "^1.0.2",
+    "@k8slens/persistable-contracts": "^1.0.2",
+    "@k8slens/preferences-contracts": "^2.0.0",
     "@k8slens/status-bar-contracts": "^1.0.2",
     "@k8slens/stylesheet-contracts": "^1.0.0",
     "@k8slens/subscribable": "^1.1.3",

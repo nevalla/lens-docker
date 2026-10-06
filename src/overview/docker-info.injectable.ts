@@ -29,4 +29,4 @@ const parse = (output: string): DockerInfo => {
   return { ...(JSON.parse(info) as DockerInfo), composeVersion: compose.trim() || undefined };
 };
 
-export const dockerInfo = getPolledDockerBunch<DockerInfo>("docker-info", () => command, parse, undefined, 30_000);
+export const dockerInfo = getPolledDockerBunch<DockerInfo>("docker-info", () => command, parse, { slowness: 6 });

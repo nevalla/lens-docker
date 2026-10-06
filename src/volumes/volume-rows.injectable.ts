@@ -1,4 +1,5 @@
 import { getPolledDockerBunch } from "../list/get-polled-docker-bunch";
+import type { DockerSettings } from "../settings/docker-settings.injectable";
 
 export interface DockerVolume {
   readonly Name: string;
@@ -20,19 +21,18 @@ export const isAnonymous = (volume: DockerVolume) => "com.docker.volume.anonymou
 const separator = "---docker-containers---";
 const sizesSeparator = "---docker-volume-sizes---";
 
-// Measuring the volumes reads them on disk, so the volumes are read less often than other lists.
-const pollIntervalMs = 15000;
-
 // The volumes in full, which container mounts which volume, and how large each is, read in one go so a
-// row carries all of it.
-const command = [
-  // Volumes and containers removed while this runs are left out rather than failing the list.
-  `(docker volume inspect $(docker volume ls -q) 2>/dev/null; true)`,
-  `echo '${sizesSeparator}'`,
-  `docker system df --verbose --format '{{json .Volumes}}'`,
-  `echo '${separator}'`,
-  `(docker inspect --format '{{.Name}}{{range .Mounts}}{{if .Name}} {{.Name}}{{end}}{{end}}' $(docker ps -aq) 2>/dev/null; true)`,
-].join(" && ");
+// row carries all of it. Measuring the volumes reads them on disk, so it is left out where the settings
+// say not to, and the volumes are read three times less often than other lists.
+const command = ({ measureVolumeSizes }: DockerSettings) =>
+  [
+    // Volumes and containers removed while this runs are left out rather than failing the list.
+    `(docker volume inspect $(docker volume ls -q) 2>/dev/null; true)`,
+    `echo '${sizesSeparator}'`,
+    ...(measureVolumeSizes ? [`docker system df --verbose --format '{{json .Volumes}}'`] : []),
+    `echo '${separator}'`,
+    `(docker inspect --format '{{.Name}}{{range .Mounts}}{{if .Name}} {{.Name}}{{end}}{{end}}' $(docker ps -aq) 2>/dev/null; true)`,
+  ].join(" && ");
 
 // Lines of "/<container name> <volume> <volume>…".
 const parseUsedBy = (output: string) => {
@@ -72,8 +72,7 @@ const parse = (output: string): DockerVolume[] => {
 
 export const dockerVolumeRows = getPolledDockerBunch<readonly DockerVolume[]>(
   "docker-volume-rows",
-  () => command,
+  command,
   parse,
-  undefined,
-  pollIntervalMs,
+  { slowness: 3 },
 );

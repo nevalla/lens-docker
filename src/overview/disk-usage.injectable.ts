@@ -14,6 +14,5 @@ export const diskUsage = getPolledDockerBunch<readonly DiskUsage[]>(
   "docker-disk-usage",
   () => "docker system df --format '{{json .}}'",
   parseJsonLines<DiskUsage>,
-  undefined,
-  15_000,
+  { slowness: 3 },
 );

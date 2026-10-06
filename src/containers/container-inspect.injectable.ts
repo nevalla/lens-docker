@@ -41,7 +41,7 @@ export interface ContainerInspect {
 
 export const containerInspect = getPolledDockerBunch<ContainerInspect, [containerId: string]>(
   "docker-container-inspect",
-  (containerId) => {
+  (_settings, containerId) => {
     if (!isContainerId(containerId)) {
       throw new Error(`Not a container id: ${containerId}`);
     }

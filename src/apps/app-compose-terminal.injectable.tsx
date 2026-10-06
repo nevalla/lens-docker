@@ -6,6 +6,8 @@ import {
   openTerminalInjectionToken,
   type TerminalTabIconProps,
 } from "@k8slens/terminal-contracts";
+import { dockerTerminalStartup } from "../settings/docker-environment";
+import { dockerSettingsInjectable } from "../settings/docker-settings.injectable";
 import type { DockerApp } from "./app-rows.injectable";
 import { composeWithFilesOf } from "./compose";
 
@@ -49,17 +51,20 @@ export const appComposeTerminal = getTerminalInjectableBunch({
   kind: appComposeTerminalKind,
   TabIcon: ComposeTabIcon,
   startup: {
-    instantiate: () => () => (appName, operationId, workingDir, configFiles) => {
-      const operation = composeOperations.find(({ id }) => id === operationId) ?? composeOperations[0];
-      const command = operation.script(composeWithFilesOf(appName, workingDir, configFiles));
+    instantiate: (di) => {
+      const settings = di.inject(dockerSettingsInjectable)();
 
-      return {
-        title: `${operation.label}: ${appName}`,
-        workingDirectory: workingDir,
-        command,
-        // Not again by itself after Lens restarts: that is the user's to decide.
-        resumeCommand: `echo "To run it again: ${operation.label} on the app in Lens."`,
-        reuseKey: `${operation.id}:${appName}`,
+      return () => async (appName, operationId, workingDir, configFiles) => {
+        const operation = composeOperations.find(({ id }) => id === operationId) ?? composeOperations[0];
+
+        return dockerTerminalStartup(await settings.loaded(), {
+          title: `${operation.label}: ${appName}`,
+          workingDirectory: workingDir,
+          command: operation.script(composeWithFilesOf(appName, workingDir, configFiles)),
+          // Not again by itself after Lens restarts: that is the user's to decide.
+          resumeCommand: `echo "To run it again: ${operation.label} on the app in Lens."`,
+          reuseKey: `${operation.id}:${appName}`,
+        });
       };
     },
   },

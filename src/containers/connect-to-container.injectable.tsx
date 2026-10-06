@@ -9,6 +9,8 @@ import {
 } from "@k8slens/terminal-contracts";
 import { shellQuote } from "../actions/run-docker-command.injectable";
 import { type ConsoleId, consoleTypes, type Endpoint } from "./container-endpoints";
+import { dockerTerminalStartup } from "../settings/docker-environment";
+import { dockerSettingsInjectable } from "../settings/docker-settings.injectable";
 import { type ContainerRef, isContainerId } from "./container-rows.injectable";
 
 type ConsoleInput = [containerId: string, containerName: string, consoleId: ConsoleId];
@@ -22,20 +24,21 @@ export const containerConsoleTerminal = getTerminalInjectableBunch({
   kind: containerConsoleTerminalKind,
   TabIcon: ConsoleTabIcon,
   startup: {
-    instantiate: () => () => (containerId, containerName, consoleId) => {
-      const type = consoleTypes.find(({ id }) => id === consoleId);
+    instantiate: (di) => {
+      const settings = di.inject(dockerSettingsInjectable)();
 
-      if (!type || !isContainerId(containerId)) {
-        throw new Error(`No ${consoleId} console for container ${containerId}`);
-      }
+      return () => async (containerId, containerName, consoleId) => {
+        const type = consoleTypes.find(({ id }) => id === consoleId);
 
-      const command = `docker exec -it ${containerId} sh -c ${shellQuote(type.script)}`;
+        if (!type || !isContainerId(containerId)) {
+          throw new Error(`No ${consoleId} console for container ${containerId}`);
+        }
 
-      return {
-        title: `${type.label}: ${containerName}`,
-        command,
-        resumeCommand: command,
-        reuseKey: `${consoleId}:${containerId}`,
+        return dockerTerminalStartup(await settings.loaded(), {
+          title: `${type.label}: ${containerName}`,
+          command: `docker exec -it ${containerId} sh -c ${shellQuote(type.script)}`,
+          reuseKey: `${consoleId}:${containerId}`,
+        });
       };
     },
   },

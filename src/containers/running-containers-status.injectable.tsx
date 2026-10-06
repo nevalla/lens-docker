@@ -14,7 +14,7 @@ export const runningContainersCount = getPolledDockerBunch<number | undefined>(
   "docker-running-containers-count",
   () => "docker ps --quiet --filter status=running",
   (output) => output.split("\n").filter((line) => line.trim()).length,
-  () => undefined,
+  { whenFailed: () => undefined },
 );
 
 const RunningContainers = observer(() => {

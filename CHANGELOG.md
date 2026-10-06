@@ -2,6 +2,14 @@
 
 What changed in each version of this extension, newest first.
 
+## 0.2.0
+
+- Settings, under Preferences → Extensions → lens-docker:
+  - Which Docker engine to use: a context, picked from those Docker knows, or a host such as `ssh://user@host`.
+  - Where the docker command is, when Lens does not find it, and a test of the connection.
+  - How often Docker is read again, and whether CPU and memory, and volume sizes, are measured.
+  - Whether the overview's clean-ups take tagged images and named volumes too.
+
 ## 0.1.2
 
 - Fixed the install link.

@@ -24,6 +24,6 @@ export interface ImageInspect {
 
 export const imageInspect = getPolledDockerBunch<ImageInspect, [reference: string]>(
   "docker-image-inspect",
-  (reference) => `docker image inspect --format '{{json .}}' ${shellQuote(reference)}`,
+  (_settings, reference) => `docker image inspect --format '{{json .}}' ${shellQuote(reference)}`,
   (output) => JSON.parse(output) as ImageInspect,
 );
