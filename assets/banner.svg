@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d63c4"/>
+      <stop offset="1" stop-color="#0b1f3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#background)"/>
+
+  <!-- Faint containers drifting at the edges, kept clear of where the banner is cropped to. -->
+  <g fill="#ffffff" opacity="0.06">
+    <rect x="40" y="430" width="200" height="110" rx="12"/>
+    <rect x="980" y="60" width="180" height="100" rx="12"/>
+    <rect x="1010" y="440" width="150" height="90" rx="12"/>
+  </g>
+
+  <!-- The icon's stack of containers, large. -->
+  <g transform="translate(200 165)">
+    <g fill="#ffffff">
+      <rect x="75" y="0" width="150" height="92" rx="12"/>
+      <rect x="0" y="118" width="142" height="92" rx="12"/>
+      <rect x="158" y="118" width="142" height="92" rx="12"/>
+    </g>
+    <g stroke="#1d63c4" stroke-width="10" stroke-linecap="round">
+      <path d="M125 22v48M175 22v48"/>
+      <path d="M47 140v48M95 140v48"/>
+      <path d="M205 140v48M253 140v48"/>
+    </g>
+    <rect x="0" y="232" width="300" height="16" rx="8" fill="#ffffff" opacity="0.55"/>
+  </g>
+
+  <g font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" fill="#ffffff">
+    <text x="580" y="290" font-size="76" font-weight="700">Docker</text>
+    <text x="582" y="350" font-size="30" opacity="0.8">Containers, images and volumes,</text>
+    <text x="582" y="392" font-size="30" opacity="0.8">right inside Lens</text>
+  </g>
+</svg>
