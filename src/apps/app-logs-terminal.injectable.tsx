@@ -6,6 +6,8 @@ import {
   openTerminalInjectionToken,
   type TerminalTabIconProps,
 } from "@k8slens/terminal-contracts";
+import { dockerTerminalStartup } from "../settings/docker-environment";
+import { dockerSettingsInjectable } from "../settings/docker-settings.injectable";
 import type { DockerApp } from "./app-rows.injectable";
 import { shellQuote } from "../actions/run-docker-command.injectable";
 import { composeOf, withCompose } from "./compose";
@@ -34,10 +36,15 @@ export const appLogsTerminal = getTerminalInjectableBunch({
   kind: appLogsTerminalKind,
   TabIcon: AppLogsTabIcon,
   startup: {
-    instantiate: () => () => (appName) => {
-      const command = followLogs(appName);
+    instantiate: (di) => {
+      const settings = di.inject(dockerSettingsInjectable)();
 
-      return { title: `Logs: ${appName}`, command, resumeCommand: command, reuseKey: appName };
+      return () => async (appName) =>
+        dockerTerminalStartup(await settings.loaded(), {
+          title: `Logs: ${appName}`,
+          command: followLogs(appName),
+          reuseKey: appName,
+        });
     },
   },
 });

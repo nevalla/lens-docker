@@ -1,4 +1,5 @@
 import { getPolledDockerBunch, parseJsonLines } from "../list/get-polled-docker-bunch";
+import type { DockerSettings } from "../settings/docker-settings.injectable";
 
 // What `docker stats` measures of a running container.
 export interface ContainerUsage {
@@ -57,12 +58,14 @@ interface ContainerLine {
   readonly compose: ComposeLabels;
 }
 
-// The containers, and what the running ones use, read in one go so a row carries both.
-const command = [
-  `docker ps --all --no-trunc --format '${containerFormat}'`,
-  `echo '${separator}'`,
-  "docker stats --no-stream --no-trunc --format '{{json .}}'",
-].join(" && ");
+// The containers, and what the running ones use, read in one go so a row carries both. Measuring takes
+// docker stats a second or two, so it is left out where the settings say not to measure.
+const command = ({ measureUsage }: DockerSettings) =>
+  [
+    `docker ps --all --no-trunc --format '${containerFormat}'`,
+    `echo '${separator}'`,
+    ...(measureUsage ? ["docker stats --no-stream --no-trunc --format '{{json .}}'"] : []),
+  ].join(" && ");
 
 const parse = (output: string): DockerContainer[] => {
   const [containersOutput, statsOutput = ""] = output.split(separator);
@@ -81,6 +84,6 @@ const parse = (output: string): DockerContainer[] => {
 
 export const dockerContainerRows = getPolledDockerBunch<readonly DockerContainer[]>(
   "docker-container-rows",
-  () => command,
+  command,
   parse,
 );

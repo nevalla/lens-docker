@@ -3,7 +3,12 @@ import { useInject } from "@k8slens/use-inject";
 import { observer } from "mobx-react";
 import { type MeasureId, measureColors } from "../charts/colors";
 import { formatCpu } from "../charts/usage-metrics";
-import { type DockerContainer, dockerContainerRows } from "../containers/container-rows.injectable";
+import { dockerSettingsInjectable } from "../settings/docker-settings.injectable";
+import { TurnedOff } from "../settings/open-docker-preferences.injectable";
+import {
+  type DockerContainer,
+  dockerContainerRows,
+} from "../containers/container-rows.injectable";
 import { openContainerDetailsInjectable } from "../containers/open-container-details.injectable";
 import { formatMemory, parseSize } from "../docker-values";
 import { useLoaded } from "../list/use-loaded";
@@ -19,12 +24,29 @@ interface Ranking {
 }
 
 const rankings: readonly Ranking[] = [
-  { id: "cpu", title: "CPU", value: ({ usage }) => parseFloat(usage?.CPUPerc ?? "0"), format: formatCpu },
-  { id: "memory", title: "Memory", value: ({ usage }) => parseSize(usage?.MemUsage.split(" / ")[0] ?? ""), format: formatMemory },
+  {
+    id: "cpu",
+    title: "CPU",
+    value: ({ usage }) => parseFloat(usage?.CPUPerc ?? "0"),
+    format: formatCpu,
+  },
+  {
+    id: "memory",
+    title: "Memory",
+    value: ({ usage }) => parseSize(usage?.MemUsage.split(" / ")[0] ?? ""),
+    format: formatMemory,
+  },
 ];
 
 const Bar = ({ fraction, color }: { fraction: number; color: string }) => (
-  <Div $style={{ height: 3, borderRadius: 1.5, backgroundColor: color, width: `${Math.max(fraction, 0.01) * 100}%` }} />
+  <Div
+    $style={{
+      height: 3,
+      borderRadius: 1.5,
+      backgroundColor: color,
+      width: `${Math.max(fraction, 0.01) * 100}%`,
+    }}
+  />
 );
 
 const Ranked = observer(({ ranking }: { ranking: Ranking }) => {
@@ -39,13 +61,20 @@ const Ranked = observer(({ ranking }: { ranking: Ranking }) => {
   return (
     <Card>
       <Span $color="textMuted">{ranking.title}</Span>
-      {top.length === 0 && <Span $color="textMuted">No container is running.</Span>}
+      {top.length === 0 && (
+        <Span $color="textMuted">No container is running.</Span>
+      )}
       {top.map(({ container, value }) => (
         <Div key={container.ID} $flex={{ direction: "vertical", gap: "xxs" }}>
           <Div $flex={{ horizontalAlign: "space-between", gap: "s" }}>
             <Button
               $color="link"
-              $style={{ textDecoration: "underline", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              $style={{
+                textDecoration: "underline",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
               $onClick={() => void openContainerDetails(container.ID)}
             >
               {container.Names}
@@ -60,14 +89,19 @@ const Ranked = observer(({ ranking }: { ranking: Ranking }) => {
 });
 
 // Where the machine goes: the containers taking the most of it, each a way into its details.
-export const TopConsumers = () => (
-  <OverviewSection title="Top consumers">
-    <Div $flex={{ gap: "m", wrap: true }}>
-      {rankings.map((ranking) => (
-        <WhenRead key={ranking.title} what="the containers">
-          <Ranked ranking={ranking} />
-        </WhenRead>
-      ))}
-    </Div>
-  </OverviewSection>
-);
+export const TopConsumers = observer(() => {
+  const { measureUsage } = useInject(dockerSettingsInjectable)().current();
+
+  return (
+    <OverviewSection title="Top consumers">
+      {!measureUsage && <TurnedOff what="Measuring CPU and memory" />}
+      <Div $flex={{ gap: "m", wrap: true }}>
+        {rankings.map((ranking) => (
+          <WhenRead key={ranking.title} what="the containers">
+            <Ranked ranking={ranking} />
+          </WhenRead>
+        ))}
+      </Div>
+    </OverviewSection>
+  );
+});

@@ -5,6 +5,7 @@ import { runDockerCommandInjectable } from "../actions/run-docker-command.inject
 import { dockerContainerRows } from "../containers/container-rows.injectable";
 import { dockerImageRows } from "../images/image-rows.injectable";
 import { dockerVolumeRows } from "../volumes/volume-rows.injectable";
+import type { DockerSettings } from "../settings/docker-settings.injectable";
 import type { DiskUsage } from "./disk-usage.injectable";
 import { diskUsage } from "./disk-usage.injectable";
 
@@ -18,15 +19,26 @@ export interface CleanUp {
   readonly subject: string;
 }
 
-export const cleanUps: readonly CleanUp[] = [
-  {
-    type: "Images",
-    label: "Remove unused",
-    script: "docker image prune --all --force",
-    question: "Remove every image no container uses?",
-    note: "Tagged images go too, and are pulled or built again when next needed. This cannot be undone.",
-    subject: "unused images",
-  },
+// What each clean-up takes is as the settings say: tagged images and named volumes, or only what nobody
+// named.
+export const cleanUpsFor = ({ pruneTaggedImages, pruneNamedVolumes }: DockerSettings): readonly CleanUp[] => [
+  pruneTaggedImages
+    ? {
+        type: "Images",
+        label: "Remove unused",
+        script: "docker image prune --all --force",
+        question: "Remove every image no container uses?",
+        note: "Tagged images go too, and are pulled or built again when next needed. This cannot be undone.",
+        subject: "unused images",
+      }
+    : {
+        type: "Images",
+        label: "Remove dangling",
+        script: "docker image prune --force",
+        question: "Remove every untagged image no container uses?",
+        note: "Tagged images stay, as the settings say. This cannot be undone.",
+        subject: "dangling images",
+      },
   {
     type: "Containers",
     label: "Remove stopped",
@@ -35,14 +47,23 @@ export const cleanUps: readonly CleanUp[] = [
     note: "Their logs and anything they wrote outside a volume are lost. This cannot be undone.",
     subject: "stopped containers",
   },
-  {
-    type: "Local Volumes",
-    label: "Remove unused",
-    script: "docker volume prune --all --force",
-    question: "Remove every volume no container uses?",
-    note: "Named volumes go too, with their data, such as a database's. This cannot be undone.",
-    subject: "unused volumes",
-  },
+  pruneNamedVolumes
+    ? {
+        type: "Local Volumes",
+        label: "Remove unused",
+        script: "docker volume prune --all --force",
+        question: "Remove every volume no container uses?",
+        note: "Named volumes go too, with their data, such as a database's. This cannot be undone.",
+        subject: "unused volumes",
+      }
+    : {
+        type: "Local Volumes",
+        label: "Remove anonymous",
+        script: "docker volume prune --force",
+        question: "Remove every anonymous volume no container uses?",
+        note: "Named volumes stay, as the settings say. Anonymous ones go with their data. This cannot be undone.",
+        subject: "unused anonymous volumes",
+      },
   {
     type: "Build Cache",
     label: "Clear",

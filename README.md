@@ -18,6 +18,14 @@ Browse the Docker containers, images and volumes on your machine without leaving
 - Images and volumes show which containers use them, and volumes how large they are. Remove them the same way as containers, and click an image's repository or a volume's name for its details: an image's tags, digests, platform, layers and command; a volume's size, mountpoint, options and labels.
 - Click a container's name to open its details in a drawer over the list: when it was created, its command, state, exit code, restarts, ports, networks, mounts and environment.
 
+## Settings
+
+Under **Preferences → Extensions → lens-docker**:
+
+- **Connection:** which Docker engine to use, as a context (pick one of those Docker knows) or a host such as `unix:///…/docker.sock` or `ssh://user@host`; where the `docker` command is, when Lens does not find it; and **Test connection**, which shows the engine's version or why it cannot be reached.
+- **Refreshing:** how often Docker is read again, and whether CPU and memory, and volume sizes, are measured: turning them off saves Docker the work.
+- **Clean-ups:** whether the overview's clean-ups remove tagged images and named volumes too, or only dangling images and anonymous volumes.
+
 ## Install
 
 [Open lens-docker in Lens](https://app.k8slens.dev/lens-launcher?c=lens%3A%2F%2Fapp%2Fopen%2Fextension%3Fname%3Dlens-docker) and click Install there. The link offers Lens for download when it is not installed yet.

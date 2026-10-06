@@ -12,6 +12,9 @@ import { formatMemory } from "../docker-values";
 import { DetailsSection } from "../list/details-drawer";
 import { ErrorBoundary } from "../list/error-boundary";
 import { useLoaded } from "../list/use-loaded";
+import { dockerSettingsInjectable } from "../settings/docker-settings.injectable";
+import { TurnedOff } from "../settings/open-docker-preferences.injectable";
+import { useInject } from "@k8slens/use-inject";
 import { type MeasureId, measureColors } from "./colors";
 import { Sparkline } from "./sparkline";
 import { UsageChart } from "./usage-chart";
@@ -88,8 +91,17 @@ const MeasureTabs = ({ selected, onSelect }: { selected: Measure; onSelect: (mea
   </Div>
 );
 
-const Charts = ({ containerIds }: { containerIds: readonly string[] }) => {
+const Charts = observer(({ containerIds }: { containerIds: readonly string[] }) => {
   const [selected, setSelected] = useState(measures[0]);
+  const { measureUsage } = useInject(dockerSettingsInjectable)().current();
+
+  if (!measureUsage) {
+    return (
+      <Div $padding="s">
+        <TurnedOff what="Measuring CPU and memory" />
+      </Div>
+    );
+  }
 
   return (
     <>
@@ -101,7 +113,7 @@ const Charts = ({ containerIds }: { containerIds: readonly string[] }) => {
       </ErrorBoundary>
     </>
   );
-};
+});
 
 // CPU and memory over the last minutes, of a container, or summed over an app's.
 export const UsageMetrics = ({ containerIds }: { containerIds: readonly string[] }) => (

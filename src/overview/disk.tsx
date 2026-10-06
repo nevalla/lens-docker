@@ -3,7 +3,8 @@ import { DeleteSweepIcon } from "@k8slens/icon";
 import { PlainButton } from "@k8slens/input-components";
 import { useInject } from "@k8slens/use-inject";
 import { observer } from "mobx-react";
-import { cleanUps, runCleanUpInjectable } from "./clean-up.injectable";
+import { dockerSettingsInjectable } from "../settings/docker-settings.injectable";
+import { cleanUpsFor, runCleanUpInjectable } from "./clean-up.injectable";
 import { type DiskUsage, diskUsage } from "./disk-usage.injectable";
 import { useLoaded } from "../list/use-loaded";
 import { OverviewSection, WhenRead } from "./section";
@@ -20,9 +21,9 @@ const names: Record<DiskUsage["Type"], string> = {
 
 const isNothing = (size: string) => /^0(\.0+)?\s*[kMGT]?B/.test(size);
 
-const Row = ({ line }: { line: DiskUsage }) => {
+const Row = observer(({ line }: { line: DiskUsage }) => {
   const runCleanUp = useInject(runCleanUpInjectable)();
-  const cleanUp = cleanUps.find(({ type }) => type === line.Type);
+  const cleanUp = cleanUpsFor(useInject(dockerSettingsInjectable)().current()).find(({ type }) => type === line.Type);
   const reclaimable = line.Reclaimable.split(" ")[0];
 
   return (
@@ -46,7 +47,7 @@ const Row = ({ line }: { line: DiskUsage }) => {
       </Div>
     </Div>
   );
-};
+});
 
 const LoadedDisk = observer(() => {
   const usage = useLoaded(diskUsage.subscribable);
