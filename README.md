@@ -20,7 +20,7 @@ Browse the Docker containers, images and volumes on your machine without leaving
 
 ## Install
 
-[Open lens-docker in Lens](https://frontend.lc-staging1.staging-k8slens.cloud/lens-launcher?c=lens%3A%2F%2Fapp%2Fopen%2Fextension%3Fname%3Dlens-docker) and click Install there. The link offers Lens for download when it is not installed yet.
+[Open lens-docker in Lens](https://app.k8slens.dev/lens-launcher?c=lens%3A%2F%2Fapp%2Fopen%2Fextension%3Fname%3Dlens-docker) and click Install there. The link offers Lens for download when it is not installed yet.
 
 ## Usage
 
