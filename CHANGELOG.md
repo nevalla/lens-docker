@@ -2,6 +2,10 @@
 
 What changed in each version of this extension, newest first.
 
+## 0.1.2
+
+- Fixed the install link.
+
 ## 0.1.1
 
 - The images and volumes lists no longer fail while containers or volumes are being removed, such as during a Compose down or a clean-up.

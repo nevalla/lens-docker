@@ -1,6 +1,6 @@
 {
   "name": "lens-docker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Docker on your machine, inside Lens: an overview, Compose apps, containers, images and volumes, with logs, shells, database consoles and live CPU and memory.",
   "license": "MIT",
   "author": "Lauri Nevala <lauri.nevala@gmail.com>",
